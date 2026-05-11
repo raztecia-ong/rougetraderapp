@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="theme-color" content="#0e0d0b" />
+  <title>Rogue Trader</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<div id="app">
+
+  <!-- Header -->
+  <header id="header">
+    <div id="header-text">
+      <div id="char-name">Loading...</div>
+      <div id="char-role"></div>
+    </div>
+    <button id="edit-char-btn" onclick="openEditCharacter()">✎ Edit</button>
+  </header>
+
+  <!-- Main content -->
+  <main id="content">
+
+    <!-- ===== Sheet tab ===== -->
+    <section id="tab-sheet" class="tab-content">
+
+      <div class="section-heading">Characteristics</div>
+      <div id="stats-grid"></div>
+
+      <div class="section-heading">Skills</div>
+      <div id="skills-list"></div>
+
+      <div class="section-heading">Notes</div>
+      <div id="notes-display" style="font-size:14px; color:var(--text-muted); white-space:pre-wrap; min-height:40px;"></div>
+
+    </section>
+
+    <!-- ===== Vitals tab ===== -->
+    <section id="tab-vitals" class="tab-content">
+
+      <div class="section-heading">Hit Points</div>
+      <div class="vital-card">
+        <div class="vital-header">
+          <span class="vital-name">Wounds</span>
+          <span class="vital-values">
+            <span id="hp-current">—</span>
+            <span> / </span>
+            <span id="hp-max">—</span>
+          </span>
+        </div>
+        <div class="vital-bar-track"><div id="hp-bar" class="vital-bar"></div></div>
+        <div class="vital-controls">
+          <button class="vital-btn" onclick="adjustVital('hp','current',-1)">−</button>
+          <button class="vital-btn" onclick="adjustVital('hp','current',1)">+</button>
+          <button class="vital-btn max-btn" onclick="adjustVital('hp','max',-1)">Max −</button>
+          <button class="vital-btn max-btn" onclick="adjustVital('hp','max',1)">Max +</button>
+        </div>
+      </div>
+
+      <div class="section-heading">Corruption</div>
+      <div class="vital-card">
+        <div class="vital-header">
+          <span class="vital-name">Corruption</span>
+          <span class="vital-values">
+            <span id="corruption-current">—</span>
+            <span> / 100</span>
+          </span>
+        </div>
+        <div class="vital-bar-track"><div id="corruption-bar" class="vital-bar danger"></div></div>
+        <div class="vital-controls">
+          <button class="vital-btn" onclick="adjustVital('corruption','current',-1)">−</button>
+          <button class="vital-btn" onclick="adjustVital('corruption','current',1)">+</button>
+        </div>
+        <span id="corruption-max" style="display:none">100</span>
+      </div>
+
+      <div class="section-heading">Insanity</div>
+      <div class="vital-card">
+        <div class="vital-header">
+          <span class="vital-name">Insanity</span>
+          <span class="vital-values">
+            <span id="insanity-current">—</span>
+            <span> / 100</span>
+          </span>
+        </div>
+        <div class="vital-bar-track"><div id="insanity-bar" class="vital-bar danger"></div></div>
+        <div class="vital-controls">
+          <button class="vital-btn" onclick="adjustVital('insanity','current',-1)">−</button>
+          <button class="vital-btn" onclick="adjustVital('insanity','current',1)">+</button>
+        </div>
+        <span id="insanity-max" style="display:none">100</span>
+      </div>
+
+      <div class="section-heading">Fate Points</div>
+      <div class="vital-card">
+        <div class="vital-header">
+          <span class="vital-name">Fate</span>
+          <span class="vital-values">
+            <span id="fate-current">—</span>
+            <span> / </span>
+            <span id="fate-max">—</span>
+          </span>
+        </div>
+        <div class="vital-bar-track"><div id="fate-bar" class="vital-bar"></div></div>
+        <div class="vital-controls">
+          <button class="vital-btn" onclick="adjustVital('fate','current',-1)">−</button>
+          <button class="vital-btn" onclick="adjustVital('fate','current',1)">+</button>
+          <button class="vital-btn max-btn" onclick="adjustVital('fate','max',-1)">Max −</button>
+          <button class="vital-btn max-btn" onclick="adjustVital('fate','max',1)">Max +</button>
+        </div>
+      </div>
+
+      <div class="section-heading">Experience</div>
+      <div class="xp-card">
+        <div class="xp-row">
+          <span class="xp-label">Earned</span>
+          <span class="xp-val" id="xp-earned">0</span>
+        </div>
+        <div class="xp-row">
+          <span class="xp-label">Spent</span>
+          <span class="xp-val" id="xp-spent">0</span>
+        </div>
+        <div class="xp-row" style="border-top:1px solid var(--border); padding-top:10px; margin-top:4px;">
+          <span class="xp-label">Remaining</span>
+          <span class="xp-val remaining" id="xp-remaining">0</span>
+        </div>
+        <div class="xp-controls">
+          <button class="xp-btn" onclick="adjustXP('earned', -100)">Earned −100</button>
+          <button class="xp-btn" onclick="adjustXP('earned', 100)">Earned +100</button>
+        </div>
+        <div class="xp-controls mt">
+          <button class="xp-btn" onclick="adjustXP('spent', -100)">Spent −100</button>
+          <button class="xp-btn" onclick="adjustXP('spent', 100)">Spent +100</button>
+        </div>
+      </div>
+
+      <!-- Export / Import -->
+      <div class="section-heading">Data</div>
+      <div class="data-row">
+        <button class="data-btn" id="export-btn">⬇ Export JSON</button>
+        <label class="data-btn">
+          ⬆ Import JSON
+          <input type="file" id="import-btn" accept=".json" style="display:none" />
+        </label>
+      </div>
+
+    </section>
+
+    <!-- ===== Talents tab ===== -->
+    <section id="tab-talents" class="tab-content">
+
+      <div class="section-heading">Talents &amp; Traits</div>
+      <div id="talents-list"></div>
+      <button class="add-btn" onclick="openAddTalent()">+ Add Talent</button>
+
+    </section>
+
+    <!-- ===== Equipment tab ===== -->
+    <section id="tab-equipment" class="tab-content">
+
+      <div class="section-heading">Weapons</div>
+      <div id="weapons-list"></div>
+      <button class="add-btn" onclick="openAddItem('weapon')">+ Add Weapon</button>
+
+      <div class="section-heading">Gear &amp; Equipment</div>
+      <div id="gear-list"></div>
+      <button class="add-btn" onclick="openAddItem('gear')">+ Add Item</button>
+
+    </section>
+
+    <!-- ===== Dice tab ===== -->
+    <section id="tab-dice" class="tab-content">
+
+      <select id="dice-stat-select">
+        <option value="">— Roll without target —</option>
+      </select>
+
+      <button id="dice-roll-btn" onclick="rollD100()">Roll<br>d100</button>
+
+      <div id="dice-result"></div>
+      <div id="dice-label"></div>
+
+    </section>
+
+  </main>
+
+  <!-- Bottom navigation -->
+  <nav id="nav">
+    <button class="nav-btn" data-tab="sheet">
+      <span class="nav-icon">📋</span>
+      Sheet
+    </button>
+    <button class="nav-btn" data-tab="vitals">
+      <span class="nav-icon">❤️</span>
+      Vitals
+    </button>
+    <button class="nav-btn" data-tab="talents">
+      <span class="nav-icon">⭐</span>
+      Talents
+    </button>
+    <button class="nav-btn" data-tab="equipment">
+      <span class="nav-icon">⚔️</span>
+      Gear
+    </button>
+    <button class="nav-btn" data-tab="dice">
+      <span class="nav-icon">🎲</span>
+      Dice
+    </button>
+  </nav>
+
+</div>
+
+<!-- Skill / Stat modal -->
+<div id="modal-overlay" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <span id="modal-title"></span>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<!-- Edit character modal -->
+<div id="edit-modal-overlay" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <span style="font-size:18px; font-weight:700; color:var(--gold);">Edit Character</span>
+      <button class="modal-close" onclick="closeEditModal()">×</button>
+    </div>
+    <div class="edit-form">
+      <div>
+        <label class="edit-label">Name</label>
+        <input type="text" id="edit-name" placeholder="Character name" />
+      </div>
+      <div>
+        <label class="edit-label">Role / Career</label>
+        <input type="text" id="edit-role" placeholder="e.g. Rogue Trader, Arch-Militant" />
+      </div>
+      <div>
+        <label class="edit-label">Homeworld</label>
+        <input type="text" id="edit-homeworld" placeholder="e.g. Scintilla, Void-born" />
+      </div>
+      <div>
+        <label class="edit-label">Background</label>
+        <input type="text" id="edit-background" placeholder="Brief background" />
+      </div>
+      <div>
+        <label class="edit-label">Notes</label>
+        <textarea id="edit-notes" rows="4" placeholder="Talents, traits, gear, misc notes..."></textarea>
+      </div>
+      <div class="edit-actions">
+        <button class="btn-secondary" onclick="closeEditModal()">Cancel</button>
+        <button class="btn-primary" onclick="saveEditCharacter()">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add / Edit Talent modal -->
+<div id="talent-modal-overlay" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <span id="talent-modal-title" style="font-size:18px; font-weight:700; color:var(--gold);">Add Talent</span>
+      <button class="modal-close" onclick="closeTalentModal()">×</button>
+    </div>
+    <div class="edit-form">
+      <input type="hidden" id="talent-edit-index" value="-1" />
+      <div>
+        <label class="edit-label">Talent / Trait Name</label>
+        <input type="text" id="talent-name" placeholder="e.g. Ambidextrous" />
+      </div>
+      <div>
+        <label class="edit-label">Description</label>
+        <textarea id="talent-desc" rows="4" placeholder="What does it do?"></textarea>
+      </div>
+      <div class="edit-actions">
+        <button class="btn-secondary" onclick="closeTalentModal()">Cancel</button>
+        <button class="btn-primary" onclick="saveTalent()">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add / Edit Item modal -->
+<div id="item-modal-overlay" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <span id="item-modal-title" style="font-size:18px; font-weight:700; color:var(--gold);">Add Item</span>
+      <button class="modal-close" onclick="closeItemModal()">×</button>
+    </div>
+    <div class="edit-form">
+      <input type="hidden" id="item-edit-index" value="-1" />
+      <input type="hidden" id="item-edit-type" value="gear" />
+      <div>
+        <label class="edit-label">Name</label>
+        <input type="text" id="item-name" placeholder="e.g. Plasma Pistol" />
+      </div>
+      <div id="weapon-fields">
+        <label class="edit-label">Damage</label>
+        <input type="text" id="item-damage" placeholder="e.g. 1d10+4 E" />
+        <label class="edit-label" style="margin-top:10px;">Range</label>
+        <input type="text" id="item-range" placeholder="e.g. 30m" />
+        <label class="edit-label" style="margin-top:10px;">Special / RoF</label>
+        <input type="text" id="item-special" placeholder="e.g. Clip 10, Overheat, S/2/–" />
+      </div>
+      <div>
+        <label class="edit-label">Notes</label>
+        <textarea id="item-notes" rows="3" placeholder="Any extra details..."></textarea>
+      </div>
+      <div class="edit-actions">
+        <button class="btn-secondary" onclick="closeItemModal()">Cancel</button>
+        <button class="btn-primary" onclick="saveItem()">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Scripts -->
+<script src="js/data.js"></script>
+<script src="js/storage.js"></script>
+<script src="js/app.js"></script>
+
+</body>
+</html>
